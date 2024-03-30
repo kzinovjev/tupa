@@ -44,6 +44,10 @@ def projection(v1,v2):
     proj = v2*(np.dot(v1, v2)/np.dot(v2,v2))
     return proj
 
+def signed_projection(v1,v2):
+    """ Returns signed (scalar) projection of vector v1 onto vector v2 """
+    return np.dot(v1, v2)/np.linalg.norm(v2)
+
 
 def angle_between(v1, v2):
     """ Returns angle (in radians) between vector v1 and vector v2 """

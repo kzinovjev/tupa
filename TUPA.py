@@ -96,7 +96,8 @@ format.print_run_info(config, top_file, traj_file, outdir)
 # creating file objects to write in them on the fly
 out, outres, outangle, outprobe = format.open_outputs(outdir)
 if config.mode == "bond":
-    outproj, outalig, outrbond, outresbond = format.open_outputs_bond(outdir)
+    outproj, outalig, outrbond, outresbond, outressproj = \
+        format.open_outputs_bond(outdir)
 
 
 ###############################################################################
@@ -283,12 +284,14 @@ for ts in u.trajectory[0: len(u.trajectory):]:
             resEfproj_bond = projection(resEf,rbond_vec)
             resEfprojmag_bond = mag(resEfproj_bond)
             resEfalignment_bond = alignment(resEfprojmag_bond,totalEfmag)
+            resEfsproj_bond = signed_projection(resEf,rbond_vec)
 
+            values = [resEfprojmag_bond,resEfalignment_bond,resEfsproj_bond]
             if r not in results.resEFalignment_bond_per_frame.keys():
-                new_res_array1 = np.append(time, [resEfprojmag_bond,resEfalignment_bond])
+                new_res_array1 = np.append(time, values)
                 results.resEFalignment_bond_per_frame[r]  = [new_res_array1]
             else:
-                new_res_array1 = np.append(time, [resEfprojmag_bond,resEfalignment_bond])
+                new_res_array1 = np.append(time, values)
                 old_res_array  = results.resEFalignment_bond_per_frame[r]
                 new_res_array2 = np.append(old_res_array, [new_res_array1], axis=0)
                 results.resEFalignment_bond_per_frame[r]  = new_res_array2
@@ -330,6 +333,7 @@ if config.mode == 'bond':
         r = r.partition('_')[2] # ignore resname and keep resid
         resEfprojmag_bond   = timeseries[:,1].astype('float32')
         resEfalignment_bond = timeseries[:,2].astype('float32')
+        resEfsproj_bond     = timeseries[:,3].astype('float32')
 
         resEfmag_avg_bond  = np.average(resEfprojmag_bond)
         resEfmag_std_bond  = np.std(resEfprojmag_bond)
@@ -339,6 +343,12 @@ if config.mode == 'bond':
         # write contribution of each residue
         lineresbond = format.fmt_res_out_line([r, resEfmag_avg_bond, resEfmag_std_bond, resEfalig_avg_bond, resEfalig_std_bond])
         outresbond.write(lineresbond)
+
+        resEfsproj_avg_bond  = np.average(resEfsproj_bond)
+        resEfsproj_std_bond  = np.std(resEfsproj_bond)
+
+        lineressprojbond = format.fmt_res_sproj_out_line([r, resEfsproj_avg_bond, resEfsproj_std_bond])
+        outressproj.write(lineressprojbond)
 
 
 ###############################################################################
@@ -421,6 +431,7 @@ out.close()
 if config.mode == "bond":
     outproj.close()
     outrbond.close()
+    outressproj.close()
 
 stop = timeit.default_timer()
 print("\n>>> Calculation complete!")

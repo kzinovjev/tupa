@@ -174,10 +174,16 @@ def open_outputs_bond(outdir):
 	outresbond.write("#time              Efproj_res     Std.Dev        AVG_align%     Std_align%\n")
 	outresbond.write("@type xydy\n")
 
+	outressproj = open(os.path.join(outdir, "Residue_signed_proj_to_bond.dat"), 'w')
+	outressproj.write(
+		"""@    title "Magnitude of Electric Field"\n@    xaxis  label "Residues"\n@    yaxis  label "MV/cm"\n""")
+	outressproj.write("#time              Efsproj_res    Std.Dev\n")
+	outressproj.write("@type xydy\n")
+
 	outrbond = open(os.path.join(outdir,"bond_axis_info.dat"), "w")
 	outrbond.write("#time       rbondvec_in_meters                                   rbond_magnitude             rbond_unit_vector\n")
 
-	return outproj, outalig, outrbond, outresbond
+	return outproj, outalig, outrbond, outresbond, outressproj
 
 
 ##############################################################
@@ -203,6 +209,10 @@ def fmt_efield_out_line(field_array, t=None, lastline = False):
 
 def fmt_res_out_line(field_array):
 	string = "{a:<12}{b: 15.6f}{c: 15.6f}{d: 15.6f}{e: 15.6f}\n".format(a=field_array[0], b=field_array[1], c=field_array[2], d=field_array[3],e=field_array[4])
+	return string
+
+def fmt_res_sproj_out_line(field_array):
+	string = "{a:<12}{b: 15.6f}{c: 15.6f}\n".format(a=field_array[0], b=field_array[1], c=field_array[2])
 	return string
 
 
